@@ -1,0 +1,315 @@
+import { useState } from "react";
+import Header from "@/components/Header";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { CalendarDays, User, Heart, Ruler, Weight, Mail, Phone } from "lucide-react";
+
+export default function PersonalDetails() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    age: "",
+    gender: "",
+    height: "",
+    weight: "",
+    bloodGroup: "",
+    emergencyContact: "",
+    emergencyPhone: "",
+    allergies: "",
+    medications: "",
+    medicalHistory: ""
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Check if all required fields are filled
+    const requiredFields = [
+      'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'age',
+      'gender', 'height', 'weight', 'bloodGroup', 'emergencyContact',
+      'emergencyPhone', 'allergies', 'medications', 'medicalHistory'
+    ];
+
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+
+    if (missingFields.length > 0) {
+      alert(`Please fill in all required fields. Missing: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    console.log("Patient data:", formData);
+    // TODO: Submit to backend
+    alert("Patient information saved successfully! All required fields are complete.");
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800">
+      <Header />
+      <main className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2">
+                <User className="h-8 w-8 text-primary" />
+                Personal Details
+              </CardTitle>
+              <CardDescription className="text-lg">
+                Please provide your basic information for our medical records
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Basic Information */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Enter your first name"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange("firstName", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Enter your last name"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange("lastName", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Email Address <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      Phone Number <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Personal Details */}
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth" className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4" />
+                      Date of Birth <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="age">Age <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      placeholder="25"
+                      min="1"
+                      max="120"
+                      value={formData.age}
+                      onChange={(e) => handleInputChange("age", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Gender <span className="text-red-500">*</span></Label>
+                    <Select onValueChange={(value) => handleInputChange("gender", value)} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Physical Information */}
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="height" className="flex items-center gap-2">
+                      <Ruler className="h-4 w-4" />
+                      Height (cm) <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="height"
+                      type="number"
+                      placeholder="170"
+                      min="50"
+                      max="250"
+                      value={formData.height}
+                      onChange={(e) => handleInputChange("height", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="weight" className="flex items-center gap-2">
+                      <Weight className="h-4 w-4" />
+                      Weight (kg) <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="weight"
+                      type="number"
+                      placeholder="70"
+                      min="20"
+                      max="300"
+                      value={formData.weight}
+                      onChange={(e) => handleInputChange("weight", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bloodGroup" className="flex items-center gap-2">
+                      <Heart className="h-4 w-4" />
+                      Blood Group <span className="text-red-500">*</span>
+                    </Label>
+                    <Select onValueChange={(value) => handleInputChange("bloodGroup", value)} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select blood group" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A+">A+</SelectItem>
+                        <SelectItem value="A-">A-</SelectItem>
+                        <SelectItem value="B+">B+</SelectItem>
+                        <SelectItem value="B-">B-</SelectItem>
+                        <SelectItem value="AB+">AB+</SelectItem>
+                        <SelectItem value="AB-">AB-</SelectItem>
+                        <SelectItem value="O+">O+</SelectItem>
+                        <SelectItem value="O-">O-</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Emergency Contact */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyContact">Emergency Contact Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="emergencyContact"
+                      type="text"
+                      placeholder="Enter emergency contact name"
+                      value={formData.emergencyContact}
+                      onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyPhone">Emergency Contact Phone <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="emergencyPhone"
+                      type="tel"
+                      placeholder="+1 (555) 987-6543"
+                      value={formData.emergencyPhone}
+                      onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Medical Information */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="allergies">Allergies <span className="text-red-500">*</span></Label>
+                    <Textarea
+                      id="allergies"
+                      placeholder="List any known allergies (e.g., penicillin, peanuts, etc.)"
+                      value={formData.allergies}
+                      onChange={(e) => handleInputChange("allergies", e.target.value)}
+                      rows={3}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="medications">Current Medications <span className="text-red-500">*</span></Label>
+                    <Textarea
+                      id="medications"
+                      placeholder="List current medications and dosages"
+                      value={formData.medications}
+                      onChange={(e) => handleInputChange("medications", e.target.value)}
+                      rows={3}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="medicalHistory">Medical History <span className="text-red-500">*</span></Label>
+                    <Textarea
+                      id="medicalHistory"
+                      placeholder="Describe any significant medical history, surgeries, or chronic conditions"
+                      value={formData.medicalHistory}
+                      onChange={(e) => handleInputChange("medicalHistory", e.target.value)}
+                      rows={4}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-center pt-6">
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    className="w-full md:w-auto px-12 py-3 text-lg bg-primary hover:bg-primary/90"
+                  >
+                    Save Patient Information
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+}
