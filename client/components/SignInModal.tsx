@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,37 +14,99 @@ interface SignInModalProps {
 
 export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  // Clerk hooks
+  const { signIn, setActive } = useSignIn();
+  const { signUp, setActive: setActiveSignUp } = useSignUp();
+
+  // Form state
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    name: ""
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setError(""); // Clear error when user types
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!signIn) return;
+    
     setIsLoading(true);
-    // TODO: Implement email sign-in logic
-    console.log("Email sign-in clicked");
-    setTimeout(() => {
+    setError("");
+
+    try {
+      const result = await signIn.create({
+        identifier: formData.email,
+        password: formData.password,
+      });
+
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        onClose();
+      }
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Sign in failed. Please try again.");
+    } finally {
       setIsLoading(false);
-      onClose();
-    }, 1000);
+    }
   };
 
   const handleGoogleSignIn = async () => {
+    if (!signIn) return;
+    
     setIsLoading(true);
-    // TODO: Implement Google sign-in logic
-    console.log("Google sign-in clicked");
-    setTimeout(() => {
+    setError("");
+
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/dashboard"
+      });
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Google sign-in failed.");
       setIsLoading(false);
-      onClose();
-    }, 1000);
+    }
   };
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!signUp) return;
+    
     setIsLoading(true);
-    // TODO: Implement email sign-up logic
-    console.log("Email sign-up clicked");
-    setTimeout(() => {
+    setError("");
+
+    try {
+      const result = await signUp.create({
+        emailAddress: formData.email,
+        password: formData.password,
+        firstName: formData.name.split(' ')[0] || '',
+        lastName: formData.name.split(' ').slice(1).join(' ') || '',
+      });
+
+      if (result.status === "complete") {
+        await setActiveSignUp({ session: result.createdSessionId });
+        onClose();
+      } else if (result.status === "missing_requirements") {
+        // Handle email verification if required
+        console.log("Email verification required");
+        // You might want to show a verification step here
+      }
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Sign up failed. Please try again.");
+    } finally {
       setIsLoading(false);
-      onClose();
-    }, 1000);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    // Same as sign in for OAuth
+    await handleGoogleSignIn();
   };
 
   return (
@@ -64,6 +127,12 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           </DialogDescription>
         </DialogHeader>
         
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+            {error}
+          </div>
+        )}
+        
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -81,6 +150,8 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     type="email"
                     placeholder="Enter your email"
                     className="pl-10"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     required
                   />
                 </div>
@@ -94,6 +165,8 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     type="password"
                     placeholder="Enter your password"
                     className="pl-10"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
                     required
                   />
                 </div>
@@ -157,6 +230,8 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     type="text"
                     placeholder="Enter your full name"
                     className="pl-10"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
                     required
                   />
                 </div>
@@ -170,6 +245,8 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     type="email"
                     placeholder="Enter your email"
                     className="pl-10"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     required
                   />
                 </div>
@@ -183,6 +260,8 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     type="password"
                     placeholder="Create a password"
                     className="pl-10"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
                     required
                   />
                 </div>
@@ -207,7 +286,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
             </div>
             
             <Button 
-              onClick={handleGoogleSignIn} 
+              onClick={handleGoogleSignUp} 
               variant="outline" 
               className="w-full" 
               size="lg"
