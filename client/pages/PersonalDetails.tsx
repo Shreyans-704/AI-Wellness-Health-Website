@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarDays, User, Heart, Ruler, Weight, Mail, Phone } from "lucide-react";
+import { CalendarDays, User, Heart, Ruler, Weight, Mail, Phone,Download } from "lucide-react";
+import jsPDF from "jspdf";
 
 export default function PersonalDetails() {
   const [formData, setFormData] = useState({
@@ -32,6 +33,129 @@ export default function PersonalDetails() {
       ...prev,
       [field]: value
     }));
+  };
+
+      const generatePDF = () => {
+    const doc = new jsPDF();
+
+    // Check if form has data
+    if (!formData.firstName && !formData.lastName) {
+      alert("Please fill in the form before downloading PDF");
+      return;
+    }
+
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text("WellnessAI - Patient Information", 20, 30);
+
+    // Line under header
+    doc.setLineWidth(0.5);
+    doc.line(20, 35, 190, 35);
+
+    let yPosition = 50;
+    const lineHeight = 8;
+
+    // Helper function to add field
+    const addField = (label: string, value: string) => {
+      if (value) {
+        doc.setFontSize(12);
+        doc.setTextColor(60, 60, 60);
+        doc.text(`${label}:`, 20, yPosition);
+        doc.setTextColor(20, 20, 20);
+        doc.text(value, 70, yPosition);
+        yPosition += lineHeight;
+      }
+    };
+
+    // Personal Information
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Personal Information", 20, yPosition);
+    yPosition += 10;
+
+    addField("First Name", formData.firstName);
+    addField("Last Name", formData.lastName);
+    addField("Email", formData.email);
+    addField("Phone", formData.phone);
+    addField("Date of Birth", formData.dateOfBirth);
+    addField("Age", formData.age);
+    addField("Gender", formData.gender);
+
+    yPosition += 5;
+
+    // Physical Information
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Physical Information", 20, yPosition);
+    yPosition += 10;
+
+    addField("Height", formData.height ? `${formData.height} cm` : "");
+    addField("Weight", formData.weight ? `${formData.weight} kg` : "");
+    addField("Blood Group", formData.bloodGroup);
+
+    yPosition += 5;
+
+    // Emergency Contact
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Emergency Contact", 20, yPosition);
+    yPosition += 10;
+
+    addField("Contact Name", formData.emergencyContact);
+    addField("Contact Phone", formData.emergencyPhone);
+
+    yPosition += 5;
+
+    // Medical Information
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Medical Information", 20, yPosition);
+    yPosition += 10;
+
+    // Handle longer text fields
+    if (formData.allergies) {
+      doc.setFontSize(12);
+      doc.setTextColor(60, 60, 60);
+      doc.text("Allergies:", 20, yPosition);
+      yPosition += 6;
+      doc.setTextColor(20, 20, 20);
+      const allergiesLines = doc.splitTextToSize(formData.allergies, 150);
+      doc.text(allergiesLines, 20, yPosition);
+      yPosition += allergiesLines.length * 6 + 4;
+    }
+
+    if (formData.medications) {
+      doc.setFontSize(12);
+      doc.setTextColor(60, 60, 60);
+      doc.text("Current Medications:", 20, yPosition);
+      yPosition += 6;
+      doc.setTextColor(20, 20, 20);
+      const medicationsLines = doc.splitTextToSize(formData.medications, 150);
+      doc.text(medicationsLines, 20, yPosition);
+      yPosition += medicationsLines.length * 6 + 4;
+    }
+
+    if (formData.medicalHistory) {
+      doc.setFontSize(12);
+      doc.setTextColor(60, 60, 60);
+      doc.text("Medical History:", 20, yPosition);
+      yPosition += 6;
+      doc.setTextColor(20, 20, 20);
+      const historyLines = doc.splitTextToSize(formData.medicalHistory, 150);
+      doc.text(historyLines, 20, yPosition);
+    }
+
+    // Footer
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(10);
+    doc.setTextColor(128, 128, 128);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, pageHeight - 20);
+    doc.text("WellnessAI Patient Information System", 20, pageHeight - 10);
+
+    // Save the PDF
+    const fileName = `${formData.firstName || 'Patient'}_${formData.lastName || 'Info'}_${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -295,14 +419,24 @@ export default function PersonalDetails() {
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <div className="flex justify-center pt-6">
-                  <Button 
-                    type="submit" 
-                    size="lg" 
+                {/* Action Buttons */}
+                <div className="flex flex-col md:flex-row justify-center gap-4 pt-6">
+                  <Button
+                    type="submit"
+                    size="lg"
                     className="w-full md:w-auto px-12 py-3 text-lg bg-primary hover:bg-primary/90"
                   >
                     Save Patient Information
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={generatePDF}
+                    size="lg"
+                    variant="outline"
+                    className="w-full md:w-auto px-12 py-3 text-lg border-primary text-primary hover:bg-primary hover:text-white"
+                  >
+                    <Download className="h-5 w-5 mr-2" />
+                    Download PDF
                   </Button>
                 </div>
               </form>
