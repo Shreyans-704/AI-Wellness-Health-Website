@@ -9,6 +9,7 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import Index from "./pages/Index";
 import PersonalDetails from "./pages/PersonalDetails";
 import ContactInfo from "./pages/ContactInfo";
+import Health from "./pages/Health";
 
 // Import your Clerk Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/personal-details" element={<PersonalDetails />} />
           <Route path="/contact-info" element={<ContactInfo />} />
+          <Route path="/health" element={<Health />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         </Routes>
       </BrowserRouter>

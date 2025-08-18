@@ -18,6 +18,7 @@ export default function PersonalDetails() {
     dateOfBirth: "",
     age: "",
     gender: "",
+    BMI: "",
     height: "",
     weight: "",
     bloodGroup: "",
@@ -25,7 +26,9 @@ export default function PersonalDetails() {
     emergencyPhone: "",
     allergies: "",
     medications: "",
-    medicalHistory: ""
+    medicalHistory: "",
+    insuranceProvider: "",
+    policyNumber: ""
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -80,7 +83,10 @@ export default function PersonalDetails() {
     addField("Phone", formData.phone);
     addField("Date of Birth", formData.dateOfBirth);
     addField("Age", formData.age);
+    addField("BMI", formData.BMI);
     addField("Gender", formData.gender);
+    addField("Insurance Provider", formData.insuranceProvider);
+    addField("Policy Number", formData.policyNumber);
 
     yPosition += 5;
 
@@ -164,7 +170,7 @@ export default function PersonalDetails() {
     // Check if all required fields are filled
     const requiredFields = [
       'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'age',
-      'gender', 'height', 'weight', 'bloodGroup', 'emergencyContact',
+      'gender', 'BMI', 'height', 'weight', 'bloodGroup', 'emergencyContact',
       'emergencyPhone', 'allergies', 'medications', 'medicalHistory'
     ];
 
@@ -270,7 +276,7 @@ export default function PersonalDetails() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label htmlFor="age">Age <span className="text-red-500">*</span></Label>
                     <Input
                       id="age"
@@ -283,7 +289,7 @@ export default function PersonalDetails() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label htmlFor="gender">Gender <span className="text-red-500">*</span></Label>
                     <Select onValueChange={(value) => handleInputChange("gender", value)} required>
                       <SelectTrigger>
@@ -296,6 +302,49 @@ export default function PersonalDetails() {
                         <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                {/*Insurance group*/}
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="insuranceProvider" className="flex items-center gap-2">
+                      Insurance Provider <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="insuranceProvider"
+                      type="text"
+                      placeholder="Enter your insurance provider"
+                      value={formData.insuranceProvider}
+                      onChange={(e) => handleInputChange("insuranceProvider", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="policyNumber">Policy Number <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="policyNumber"
+                      type="text"
+                      placeholder="Enter your policy number"
+                      value={formData.policyNumber}
+                      onChange={(e) => handleInputChange("policyNumber", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bmi">BMI <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="bmi"
+                      type="number"
+                      placeholder="22.5"
+                      min="10"
+                      max="50"
+                      step="0.1"
+                      value={formData.BMI}
+                      onChange={(e) => handleInputChange("BMI", e.target.value)}
+                      required
+                    />
+                    <p className="text-xs text-gray-500">It includes appropriate min/max values for BMI (10-50)</p>
                   </div>
                 </div>
 

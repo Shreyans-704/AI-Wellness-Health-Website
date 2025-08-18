@@ -25,14 +25,18 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-blue-100 hover:text-white transition-colors">
-              HOME
+              Home
             </Link>
             <Link to="/personal-details" className="text-blue-100 hover:text-white transition-colors">
               Personal Details
             </Link>
+            <Link to="/health" className="text-blue-100 hover:text-white transition-colors">
+              Health
+            </Link>
             <Link to="/contact-info" className="text-blue-100 hover:text-white transition-colors">
               Contact Info
             </Link>
+            
           </nav>
 
           {/* User Actions */}
