@@ -8,6 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarDays, User, Heart, Ruler, Weight, Mail, Phone,Download } from "lucide-react";
 import jsPDF from "jspdf";
+import { supabase } from '@/lib/supabase'
+
+
+
 
 export default function PersonalDetails() {
   const [formData, setFormData] = useState({
@@ -18,7 +22,7 @@ export default function PersonalDetails() {
     dateOfBirth: "",
     age: "",
     gender: "",
-    BMI: "",
+    bmi: "",
     height: "",
     weight: "",
     bloodGroup: "",
@@ -83,7 +87,7 @@ export default function PersonalDetails() {
     addField("Phone", formData.phone);
     addField("Date of Birth", formData.dateOfBirth);
     addField("Age", formData.age);
-    addField("BMI", formData.BMI);
+    addField("bmi", formData.bmi);
     addField("Gender", formData.gender);
     addField("Insurance Provider", formData.insuranceProvider);
     addField("Policy Number", formData.policyNumber);
@@ -164,15 +168,16 @@ export default function PersonalDetails() {
     doc.save(fileName);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Check if all required fields are filled
-    const requiredFields = [
-      'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'age',
-      'gender', 'BMI', 'height', 'weight', 'bloodGroup', 'emergencyContact',
-      'emergencyPhone', 'allergies', 'medications', 'medicalHistory'
-    ];
+     const requiredFields = [
+    'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'age',
+    'gender', 'bmi', 'height', 'weight', 'bloodGroup', 'emergencyContact',
+    'emergencyPhone', 'allergies', 'medications', 'medicalHistory',
+    'insuranceProvider', 'policyNumber'
+  ];
 
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
 
@@ -181,10 +186,44 @@ export default function PersonalDetails() {
       return;
     }
 
-    console.log("Patient data:", formData);
-    // TODO: Submit to backend
-    alert("Patient information saved successfully! All required fields are complete.");
-  };
+    try {
+    const { data, error } = await supabase
+      .from('personal_details')
+      .insert([
+        {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        date_of_birth: formData.dateOfBirth,
+        age: parseInt(formData.age),
+        bmi: parseFloat(formData.bmi),
+        gender: formData.gender,
+        height_cm: parseInt(formData.height),
+        weight_kg: parseFloat(formData.weight),
+        blood_group: formData.bloodGroup,
+        emergency_contact_name: formData.emergencyContact,
+        emergency_contact_phone: formData.emergencyPhone,
+        allergies: formData.allergies,
+        current_medications: formData.medications,
+        medical_history: formData.medicalHistory,
+        insurance_provider: formData.insuranceProvider,
+        policy_number: formData.policyNumber
+      }])
+
+    if (error) throw error
+
+    alert("Patient information saved to database successfully!");
+    console.log("Saved data:", data);
+    
+    // Optional: Reset form after successful submission
+    // setFormData({ firstName: "", lastName: "", ... });
+    
+  } catch (error: any) {
+    console.error('Database error:', error.message);
+    alert('Error saving to database: ' + error.message);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800">
@@ -332,7 +371,7 @@ export default function PersonalDetails() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bmi">BMI <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="bmi">bmi <span className="text-red-500">*</span></Label>
                     <Input
                       id="bmi"
                       type="number"
@@ -340,11 +379,11 @@ export default function PersonalDetails() {
                       min="10"
                       max="50"
                       step="0.1"
-                      value={formData.BMI}
-                      onChange={(e) => handleInputChange("BMI", e.target.value)}
+                      value={formData.bmi}
+                      onChange={(e) => handleInputChange("bmi", e.target.value)}
                       required
                     />
-                    <p className="text-xs text-gray-500">It includes appropriate min/max values for BMI (10-50)</p>
+                    <p className="text-xs text-gray-500">It includes appropriate min/max values for bmi (10-50)</p>
                   </div>
                 </div>
 

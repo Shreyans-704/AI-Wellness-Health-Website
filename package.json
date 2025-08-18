@@ -23,11 +23,13 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.42.1",
     "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.55.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "jspdf": "^3.0.1",
     "multer": "^2.0.2",
     "pdf-parse": "^1.1.1",
+    "pg": "^8.16.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -68,6 +70,7 @@
     "@types/express": "^5.0.3",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.3.0",
+    "@types/pg": "^8.15.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@types/three": "^0.176.0",
