@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 
 
 
+
 export default function PersonalDetails() {
   const [formData, setFormData] = useState({
     firstName: "",

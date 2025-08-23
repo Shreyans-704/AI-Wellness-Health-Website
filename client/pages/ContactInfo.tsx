@@ -80,7 +80,7 @@ const ContactInfoSection = () => {
 
               {/* Quick Actions - Combined Box */}
               <div className="bg-white rounded-lg p-5 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Contact Options</h3>
+                {/*<h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Contact Options</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <button className="flex items-center justify-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                     <Phone className="mr-2" size={16} />
@@ -90,7 +90,7 @@ const ContactInfoSection = () => {
                     <Mail className="mr-2" size={16} />
                     Send Email
                   </button>
-                </div>
+                </div>*/}
               </div>
             </div>
           </div>
