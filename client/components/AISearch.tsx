@@ -12,6 +12,18 @@ export default function AISearch() {
   const [error, setError] = useState("");
   const [showResults, setShowResults] = useState(false);
 
+  // Helper function to get the correct API endpoint
+  const getApiEndpoint = () => {
+    // Check if we're in development (localhost)
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return '/api/gemini';  // Local development
+      }
+    }
+    return '/.netlify/functions/gemini';  // Production
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -23,14 +35,23 @@ export default function AISearch() {
     
     try {
       const requestData: GeminiQueryRequest = { query: query.trim() };
+      const endpoint = getApiEndpoint();
       
-      const res = await fetch('/api/gemini', {
+      console.log('Making request to:', endpoint); // Debug log
+      
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestData),
       });
+      
+      console.log('Response status:', res.status); // Debug log
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       
       const data: GeminiQueryResponse = await res.json();
       
@@ -42,6 +63,7 @@ export default function AISearch() {
         setError("");
       }
     } catch (err) {
+      console.error('Fetch error:', err); // Debug log
       setError("Network error. Please check your connection and try again.");
       setResponse("");
     } finally {
