@@ -31,11 +31,9 @@ if (!fs.existsSync(uploadsDir)) {
 // Configure multer for file uploads with proper storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Use the uploads directory we just created
     cb(null, uploadsDir);
   },
   filename: function (req, file, cb) {
-    // Generate unique filename while preserving extension
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
@@ -48,7 +46,6 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    // Accept only PDF files
     if (file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
@@ -57,15 +54,11 @@ const upload = multer({
   }
 });
 
-// Initialize your Gemini AI here
+// Environment check (safe)
 console.log('🔍 Environment Debug:');
-console.log('🔑 GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
-if (process.env.GEMINI_API_KEY) {
-  console.log('🔑 API Key length:', process.env.GEMINI_API_KEY.length);
-  console.log('🔑 API Key first 10 chars:', process.env.GEMINI_API_KEY.substring(0, 10));
-}
+console.log('🔑 GEMINI_API_KEY loaded:', Boolean(process.env.GEMINI_API_KEY));
 
-// TODO: Add your Gemini initialization code here
+// TODO: Initialize Gemini API here (without logging the key itself)
 // import { GoogleGenerativeAI } from '@google/generative-ai';
 // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -79,7 +72,6 @@ app.post('/api/analyze-pdf', upload.single('pdf'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    // Log file details
     console.log('✅ File received:', {
       filename: req.file.filename,
       originalname: req.file.originalname,
@@ -88,26 +80,17 @@ app.post('/api/analyze-pdf', upload.single('pdf'), async (req, res) => {
       path: req.file.path
     });
 
-    // Build the correct file path
-    const filePath = req.file.path; // Multer already provides the full path
-    console.log('📂 Full file path:', filePath);
+    const filePath = req.file.path;
 
-    // Check if file exists
     if (!fs.existsSync(filePath)) {
       console.log('❌ File not found at path:', filePath);
-      
-      // Try alternative path resolution
       const altPath = path.join(uploadsDir, req.file.filename);
       console.log('🔄 Trying alternative path:', altPath);
       
       if (fs.existsSync(altPath)) {
         console.log('✅ File found at alternative path');
-        // Use altPath for processing
         await processPDF(altPath, res);
       } else {
-        console.log('❌ File not found at alternative path either');
-        
-        // List files in uploads directory for debugging
         const files = fs.readdirSync(uploadsDir);
         console.log('📁 Files in uploads directory:', files);
         
@@ -135,33 +118,17 @@ app.post('/api/analyze-pdf', upload.single('pdf'), async (req, res) => {
   }
 });
 
-// Function to process PDF (placeholder - implement your actual logic)
+// Function to process PDF (placeholder)
 async function processPDF(filePath: string, res: express.Response) {
   try {
     console.log('📄 Processing PDF at:', filePath);
-    
-    // Read the file to ensure it's accessible
     const fileBuffer = fs.readFileSync(filePath);
     console.log('✅ File read successfully, size:', fileBuffer.length, 'bytes');
     
-    // TODO: Add your actual PDF processing logic here
-    // For example, using pdf-parse or sending to Gemini API
-    
-    // Example with pdf-parse (uncomment if you have it installed):
-    // import pdf from 'pdf-parse';
-    // const pdfData = await pdf(fileBuffer);
-    // console.log('PDF Text:', pdfData.text);
-    
-    // Clean up: Delete the file after processing (optional)
-    // fs.unlinkSync(filePath);
-    // console.log('🗑️ Temporary file deleted');
-    
-    // Send response
     res.json({
       success: true,
       message: 'PDF processed successfully',
       fileSize: fileBuffer.length,
-      // Add your analysis results here
     });
     
   } catch (error) {
@@ -187,7 +154,7 @@ app.listen(PORT, () => {
   console.log(`📍 Server directory: ${__dirname}`);
 });
 
-// Error handling for uncaught exceptions
+// Error handling
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
   process.exit(1);

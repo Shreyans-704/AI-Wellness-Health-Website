@@ -42,8 +42,9 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
     
     Response:`;
 
-    // Call Gemini API
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Safe: don't log key in URL
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`;
+
     const requestBody = {
       contents: [{
         parts: [{
@@ -58,10 +59,10 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
       }
     };
 
-    console.log('Calling Gemini API:', url.replace(apiKey, '***'));
-    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+    console.log('Calling Gemini API (endpoint only):', url);
+    console.log('Request body preview:', JSON.stringify(requestBody).substring(0, 200) + "...");
 
-    const response = await fetch(url, {
+    const response = await fetch(`${url}?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,8 +74,8 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('Gemini API error response:', errorText);
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      console.error('Gemini API error response:', errorText);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
