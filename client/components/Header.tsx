@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, User, Activity } from "lucide-react";
 import { useState } from "react";
-import SignInModal from "./SignInModal";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,14 +40,7 @@ export default function Header() {
 
           {/* User Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              size="sm"
-              className="bg-primary hover:bg-primary/90"
-              onClick={() => setIsSignInOpen(true)}
-            >
-              <User className="h-4 w-4 mr-2" />
-              Sign In
-            </Button>
+            
           </div>
 
           {/* Mobile Menu Button */}
@@ -74,37 +66,11 @@ export default function Header() {
                 Contact Info
               </Link>
               <div className="pt-4 border-t border-blue-800/50">
-                <Button
-                  size="sm"
-                  className="w-full justify-start mb-2 bg-primary hover:bg-primary/90"
-                  onClick={() => {
-                    setIsSignInOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-                <Button
-                  size="sm"
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() => {
-                    setIsSignInOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  Get Started
-                </Button>
               </div>
             </div>
           </div>
         )}
       </div>
-
-      <SignInModal
-        isOpen={isSignInOpen}
-        onClose={() => setIsSignInOpen(false)}
-      />
     </header>
   );
 }

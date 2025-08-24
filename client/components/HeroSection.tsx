@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Shield, TrendingUp } from "lucide-react";
 import TypewriterText from "./TypewriterText";
 import AISearch from "./AISearch";
-import SignInModal from "./SignInModal";
 
 export default function HeroSection() {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
@@ -65,11 +64,6 @@ export default function HeroSection() {
 
         </div>
       </div>
-
-      <SignInModal
-        isOpen={isSignInOpen}
-        onClose={() => setIsSignInOpen(false)}
-      />
     </section>
   );
 }
