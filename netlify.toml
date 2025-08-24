@@ -8,11 +8,10 @@
   node_bundler = "esbuild"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  from = "/gemini/*"
+  to = "/.netlify/functions/gemini/:splat"
   status = 200
   force = true
 
 [build.environment]
-  SECRETS_SCAN_OMIT_KEYS = "VITE_GEMINI_API_KEY"
   SECRETS_SCAN_ENABLED = "false"

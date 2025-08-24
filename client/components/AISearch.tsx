@@ -1,27 +1,32 @@
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Sparkles, Loader2, X } from "lucide-react";
 import { GeminiQueryRequest, GeminiQueryResponse } from "@shared/gemini";
 
-export default function AISearch() {
+export interface AISearchRef {
+  focusSearch: () => void;
+}
+
+const AISearch = forwardRef<AISearchRef>((props, ref) => {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    focusSearch: () => {
+      searchInputRef.current?.focus();
+    }
+  }));
 
   // Helper function to get the correct API endpoint
   const getApiEndpoint = () => {
-    // Check if we're in development (localhost)
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return '/api/gemini';  // Local development
-      }
-    }
-    return '/.netlify/functions/gemini';  // Production
+    // Always use the standard API endpoint since we're using Express server
+    return '/api/gemini';
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -36,9 +41,10 @@ export default function AISearch() {
     try {
       const requestData: GeminiQueryRequest = { query: query.trim() };
       const endpoint = getApiEndpoint();
-      
-      console.log('Making request to:', endpoint); // Debug log
-      
+
+      console.log('Making request to:', endpoint);
+      console.log('Request data:', requestData);
+
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -46,15 +52,19 @@ export default function AISearch() {
         },
         body: JSON.stringify(requestData),
       });
-      
-      console.log('Response status:', res.status); // Debug log
-      
+
+      console.log('Response status:', res.status);
+      console.log('Response headers:', res.headers);
+
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        const errorText = await res.text();
+        console.error('Error response body:', errorText);
+        throw new Error(`HTTP error! status: ${res.status} - ${errorText}`);
       }
-      
+
       const data: GeminiQueryResponse = await res.json();
-      
+      console.log('Response data:', data);
+
       if (data.error) {
         setError(data.error);
         setResponse(data.response || "Sorry, I couldn't process your request.");
@@ -63,8 +73,12 @@ export default function AISearch() {
         setError("");
       }
     } catch (err) {
-      console.error('Fetch error:', err); // Debug log
-      setError("Network error. Please check your connection and try again.");
+      console.error('Fetch error:', err);
+      if (err instanceof Error) {
+        setError(`Network error: ${err.message}. Please check your connection and try again.`);
+      } else {
+        setError("Network error. Please check your connection and try again.");
+      }
       setResponse("");
     } finally {
       setIsLoading(false);
@@ -90,6 +104,7 @@ export default function AISearch() {
       <form onSubmit={handleSearch} className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
         <Input
+          ref={searchInputRef}
           type="text"
           placeholder="Search health topics, symptoms, or ask a question..."
           value={query}
@@ -164,4 +179,8 @@ export default function AISearch() {
       )}
     </div>
   );
-}
+});
+
+AISearch.displayName = "AISearch";
+
+export default AISearch;
