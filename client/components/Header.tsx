@@ -62,6 +62,9 @@ export default function Header() {
               <Link to="/personal-details" className="text-blue-100 hover:text-white transition-colors py-2">
                 Personal Details
               </Link>
+              <Link to="/health" className="text-blue-100 hover:text-white transition-colors py-2">
+                Health
+              </Link>
               <Link to="/contact-info" className="text-blue-100 hover:text-white transition-colors py-2">
                 Contact Info
               </Link>
