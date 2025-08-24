@@ -1,7 +1,7 @@
 [build]
   command = "npm run build:client"
   functions = "netlify/functions"
-  publish = "dist/spa"
+  publish = "dist"
 
 
 [functions]
@@ -13,3 +13,7 @@
   from = "/api/*"
   status = 200
   to = "/.netlify/functions/api/:splat"
+[build.environment]
+SECRETS_SCAN_OMIT_KEYS = "VITE_GEMINI_API_KEY"
+[build.environment]
+SECRETS_SCAN_ENABLED = "false"

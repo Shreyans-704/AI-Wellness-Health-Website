@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    outDir: "dist/spa",
+    outDir: "dist",   // ✅ Changed from dist/spa → dist
+    emptyOutDir: true // ✅ Clean dist before every build
   },
   plugins: [react(), expressPlugin()],
   resolve: {
