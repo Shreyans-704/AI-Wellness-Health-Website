@@ -25,8 +25,8 @@ const AISearch = forwardRef<AISearchRef>((props, ref) => {
 
   // Helper function to get the correct API endpoint
   const getApiEndpoint = () => {
-    // Use Netlify Functions endpoint
-    return '/.netlify/functions/gemini';
+    // Always use the standard API endpoint since we're using Express server
+    return '/api/gemini';
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -56,24 +56,10 @@ const AISearch = forwardRef<AISearchRef>((props, ref) => {
       console.log('Response status:', res.status);
       console.log('Response headers:', res.headers);
 
-      // Check if response is HTML (404 error page)
-      const contentType = res.headers.get('content-type');
       if (!res.ok) {
         const errorText = await res.text();
         console.error('Error response body:', errorText);
-        
-        if (contentType && contentType.includes('text/html')) {
-          throw new Error(`Function not found (404). Make sure Netlify function is deployed correctly.`);
-        }
-        
         throw new Error(`HTTP error! status: ${res.status} - ${errorText}`);
-      }
-
-      // Check if response is JSON
-      if (!contentType || !contentType.includes('application/json')) {
-        const responseText = await res.text();
-        console.error('Non-JSON response:', responseText);
-        throw new Error('Server returned HTML instead of JSON - function may not be deployed correctly');
       }
 
       const data: GeminiQueryResponse = await res.json();
@@ -89,7 +75,7 @@ const AISearch = forwardRef<AISearchRef>((props, ref) => {
     } catch (err) {
       console.error('Fetch error:', err);
       if (err instanceof Error) {
-        setError(`Network error: ${err.message}`);
+        setError(`Network error: ${err.message}. Please check your connection and try again.`);
       } else {
         setError("Network error. Please check your connection and try again.");
       }
