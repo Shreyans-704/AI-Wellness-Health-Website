@@ -1,7 +1,3 @@
-Perfect — that’s an important detail 👏
-Let’s update your **README.md** to include the use of the **Gemini API key** for generating the report structure intelligently.
-Here’s the revised, polished version (ready to paste into your GitHub repo):
-
 ---
 
 # 🧠 AI Wellness WebApp
