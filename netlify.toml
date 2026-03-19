@@ -8,10 +8,16 @@
   node_bundler = "esbuild"
 
 [[redirects]]
-  from = "/gemini/*"
-  to = "/.netlify/functions/gemini/:splat"
+  from = "/api/gemini"
+  to = "/.netlify/functions/gemini"
   status = 200
   force = true
+
+# SPA fallback - serve index.html for all unmatched routes (React Router)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "false"

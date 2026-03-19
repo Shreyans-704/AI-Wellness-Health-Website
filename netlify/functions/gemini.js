@@ -2,7 +2,6 @@ exports.handler = async (event, context) => {
   console.log('Function invoked:', {
     method: event.httpMethod,
     path: event.path,
-    headers: event.headers,
     hasBody: !!event.body
   });
 
@@ -59,10 +58,6 @@ exports.handler = async (event, context) => {
 
     console.log('Environment check:', {
       hasApiKey: !!apiKey,
-      keyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'none',
-      allEnvKeys: Object.keys(process.env).filter(k => k.includes('GEMINI')),
-      nodeEnv: process.env.NODE_ENV,
-      context: context.clientContext
     });
 
     if (!apiKey) {
@@ -75,8 +70,7 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
           error: "Gemini API key not configured",
-          response: "Sorry, the AI service is not available at the moment. Please contact support.",
-          debug: `Env keys: ${Object.keys(process.env).filter(k => k.includes('GEMINI')).join(', ')}. All keys: ${Object.keys(process.env).length}`
+          response: "Sorry, the AI service is not available at the moment. Please contact support."
         }),
       };
     }
@@ -135,8 +129,7 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
           error: `Gemini API error: ${response.status}`,
-          response: 'Sorry, the AI service encountered an error. Please try again later.',
-          debug: errorText.substring(0, 200) // First 200 chars of error
+          response: 'Sorry, the AI service encountered an error. Please try again later.'
         }),
       };
     }
@@ -169,8 +162,7 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
           error: 'Invalid response from Gemini API',
-          response: 'Sorry, received an unexpected response format from the AI service.',
-          debug: JSON.stringify(data).substring(0, 200)
+          response: 'Sorry, received an unexpected response format from the AI service.'
         }),
       };
     }
@@ -187,8 +179,7 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         error: 'Failed to get AI response',
-        response: 'Sorry, I was unable to process your health question at the moment. Please try again later or contact our support team for assistance.',
-        debug: error.message
+        response: 'Sorry, I was unable to process your health question at the moment. Please try again later or contact our support team for assistance.'
       }),
     };
   }
