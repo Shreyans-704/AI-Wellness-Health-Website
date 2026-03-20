@@ -87,7 +87,7 @@ exports.handler = async (event, context) => {
     
     Response:`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
 
     const requestBody = {
       contents: [{

@@ -540,8 +540,15 @@ ${new Date().toLocaleDateString()}`;
       // Convert PDF to base64 for server upload
       const pdfBase64 = doc.output('datauristring').split(',')[1];
 
-      // Upload to server endpoint
-      const uploadResponse = await fetch('/api/upload-pdf', {
+      // Upload to server endpoint - use Render backend in production
+      let uploadEndpoint = '/api/upload-pdf';
+      if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+        uploadEndpoint = 'https://ai-wellness-health-website.onrender.com/api/upload-pdf';
+      }
+
+      console.log('Uploading health report to:', uploadEndpoint);
+
+      const uploadResponse = await fetch(uploadEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -553,8 +560,20 @@ ${new Date().toLocaleDateString()}`;
       });
 
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.error || 'Failed to upload PDF');
+        const contentType = uploadResponse.headers.get('content-type');
+        let errorMessage = 'Failed to upload PDF';
+        
+        if (contentType?.includes('application/json')) {
+          const errorData = await uploadResponse.json();
+          errorMessage = errorData.error || errorMessage;
+        } else {
+          // Response is HTML or text
+          const errorText = await uploadResponse.text();
+          console.error('Server returned HTML:', errorText.substring(0, 200));
+          console.error('Status:', uploadResponse.status, uploadResponse.statusText);
+          errorMessage = `Server error (${uploadResponse.status}): ${uploadResponse.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const uploadResult = await uploadResponse.json();
