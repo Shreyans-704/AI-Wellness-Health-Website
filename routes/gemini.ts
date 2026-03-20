@@ -43,8 +43,8 @@ Keep tone simple, helpful, and safe.
 User Question: "${query}"
 `;
 
-    // ✅ FIXED MODEL HERE - Use gemini-2.0-flash-exp which is available in v1beta
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
+    // ✅ FIXED MODEL HERE - Use gemini-1.5-pro which is stable and available in v1
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent`;
 
     const requestBody = {
       contents: [
