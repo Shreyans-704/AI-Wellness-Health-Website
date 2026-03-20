@@ -1,13 +1,10 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 exports.handler = async (event, context) => {
-  console.log('Function invoked:', {
-    method: event.httpMethod,
-    path: event.path,
-    hasBody: !!event.body
-  });
+  console.log('Gemini function invoked:', { method: event.httpMethod });
 
   // Handle CORS
   if (event.httpMethod === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
     return {
       statusCode: 200,
       headers: {
@@ -20,134 +17,55 @@ exports.handler = async (event, context) => {
   }
 
   if (event.httpMethod !== 'POST') {
-    console.log('Method not allowed:', event.httpMethod);
     return {
       statusCode: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
   try {
-    console.log('Processing POST request');
-    console.log('Request body:', event.body);
-    
     const { query } = JSON.parse(event.body || '{}');
-    console.log('Parsed query:', query);
 
     if (!query || query.trim().length === 0) {
-      console.log('Empty query provided');
       return {
         statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ 
-          error: "Query is required",
-          response: ""
-        }),
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: "Query is required", response: "" }),
       };
     }
 
-    // Get API key from environment variables
     const apiKey = process.env.GEMINI_API_KEY;
-
-    console.log('Environment check:', {
-      hasApiKey: !!apiKey,
-    });
-
     if (!apiKey) {
-      console.error('API key not found in environment');
       return {
         statusCode: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          error: "Gemini API key not configured",
-          response: "Sorry, the AI service is not available at the moment. Please contact support."
-        }),
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: "API key missing", response: "AI service unavailable" }),
       };
     }
 
-    // Construct health-focused prompt
-    const healthPrompt = `You are a helpful health assistant. The user has asked: "${query}". 
-    
-    Please provide a clear, informative response about their health question. Keep in mind:
-    - Provide general health information and guidance
-    - Always recommend consulting healthcare professionals for serious concerns
-    - Be empathetic and supportive
-    - Keep responses concise but comprehensive
-    - Include disclaimers when appropriate
-    
-    Response:`;
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`;
+    const result = await model.generateContent(query);
+    const response = await result.response;
+    const text = response.text();
 
-    const requestBody = {
-      contents: [{
-        parts: [{
-          text: healthPrompt
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 500,
-      }
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ response: text, query }),
     };
 
-    console.log('Making request to Gemini API');
-    console.log('Request URL:', url);
-
-    const response = await fetch(`${url}?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    console.log('Gemini API response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API error response:', errorText);
-      
-      return {
-        statusCode: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          error: `Gemini API error: ${response.status}`,
-          response: 'Sorry, the AI service encountered an error. Please try again later.'
-        }),
-      };
-    }
-
-    const data = await response.json();
-    console.log('Gemini API response data:', JSON.stringify(data, null, 2));
-    
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      const aiResponse = data.candidates[0].content.parts[0].text;
-      console.log('Successfully extracted AI response');
-      
-      return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
+  } catch (error) {
+    console.error('Gemini error:', error);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: "AI failed", response: "Try again later" }),
+    };
+  }
+};
           response: aiResponse,
           query: query
         }),
