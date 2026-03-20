@@ -8,14 +8,14 @@ import { handleUploadPdf } from "../routes/uploadPdf";
 export function createServer() {
   const app = express();
 
-  // Middleware
-  app.use(cors({
-    origin: "*"
-  }));
+  app.use(cors({ origin: "*" }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Routes
+  app.get("/", (_req, res) => {
+    res.send("Server is running");
+  });
+
   app.get("/api/ping", (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
     res.json({ message: ping });
@@ -28,11 +28,12 @@ export function createServer() {
   return app;
 }
 
-// 🔥 IMPORTANT: Start server (REQUIRED for Render)
-const app = createServer();
+// ✅ ONLY run server if NOT in Vite build
+if (!process.env.VITE) {
+  const app = createServer();
+  const port = process.env.PORT || 3000;
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
