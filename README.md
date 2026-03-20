@@ -32,38 +32,6 @@ A production-ready full-stack medical AI application providing intelligent diagn
 
 <br> 
 
-client/                    # React SPA frontend
-├── pages/                 # Route pages (Index.tsx, Health.tsx, PersonalDetails.tsx)
-├── components/            
-│   ├── Header.tsx         # Navigation header
-│   ├── HeroSection.tsx    # Landing page hero with AI search
-│   ├── AISearch.tsx       # Medical AI query component
-│   ├── FeaturesSection.tsx
-│   ├── Footer.tsx
-│   └── ui/                # Shadcn/ui component library
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utilities (Supabase client, helpers)
-└── global.css            # TailwindCSS theming & home background
-
-server/                    # Express API backend
-├── index.ts              # Server setup & routes
-├── routes/
-│   ├── gemini.ts         # AI query handler (Gemini API)
-│   ├── uploadPdf.ts      # PDF upload handler
-│   └── demo.ts           # Demo endpoint
-
-shared/                   # Shared types & interfaces
-├── api.ts               # API response types
-└── gemini.ts            # Gemini-related types
-
-public/                   # Static assets
-├── wellness-background.jpg  # Hero section background
-├── wellness_ai_logo.svg    # App logo
-└── favicon.svg
-
-netlify/                  # Netlify serverless functions
-└── functions/
-    └── gemini.js        # Gemini API integration
 ```
 
 ## 🚀 Quick Start
