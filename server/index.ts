@@ -30,14 +30,15 @@ export function createServer() {
 
 /**
  * IMPORTANT:
- * Netlify builds must finish and exit. If we start a server during the build,
- * the build will hang ("in process").
+ * Do NOT start the server during builds (Vite/Netlify/Render build step),
+ * otherwise the build hangs forever.
  *
- * Netlify sets NETLIFY="true" in its build environment.
+ * We only start the server when `npm start` is executed, because the start script
+ * sets START_SERVER=true.
  */
-const isNetlify = process.env.NETLIFY === "true";
+const shouldStartServer = process.env.START_SERVER === "true";
 
-if (!isNetlify) {
+if (shouldStartServer) {
   const app = createServer();
   const port = process.env.PORT || 3000;
 
