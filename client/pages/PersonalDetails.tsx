@@ -137,8 +137,16 @@ export default function PersonalDetails() {
       // Convert PDF to base64 for server upload
       const pdfBase64 = doc.output('datauristring').split(',')[1];
 
+      // Get API endpoint - in production (Netlify), use Render backend
+      let uploadEndpoint = '/api/upload-pdf';
+      if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+        uploadEndpoint = 'https://ai-wellness-health-website.onrender.com/api/upload-pdf';
+      }
+
+      console.log('Uploading PDF to:', uploadEndpoint);
+
       // Upload to server endpoint which will handle Supabase storage
-      const uploadResponse = await fetch('/api/upload-pdf', {
+      const uploadResponse = await fetch(uploadEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -149,9 +157,23 @@ export default function PersonalDetails() {
         })
       });
 
+      console.log('Upload response status:', uploadResponse.status);
+
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.error || 'Failed to upload PDF');
+        const contentType = uploadResponse.headers.get('content-type');
+        let errorMessage = 'Failed to upload PDF';
+        
+        if (contentType?.includes('application/json')) {
+          const errorData = await uploadResponse.json();
+          errorMessage = errorData.error || errorMessage;
+        } else {
+          // Response is HTML or text
+          const errorText = await uploadResponse.text();
+          console.error('Server returned:', uploadResponse.status, uploadResponse.statusText);
+          console.error('Response body:', errorText.substring(0, 200));
+          errorMessage = `Server error (${uploadResponse.status}): ${uploadResponse.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const uploadResult = await uploadResponse.json();
