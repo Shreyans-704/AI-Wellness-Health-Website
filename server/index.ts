@@ -28,8 +28,16 @@ export function createServer() {
   return app;
 }
 
-// ✅ ONLY run server if NOT in Vite build
-if (!process.env.VITE) {
+/**
+ * IMPORTANT:
+ * Netlify builds must finish and exit. If we start a server during the build,
+ * the build will hang ("in process").
+ *
+ * Netlify sets NETLIFY="true" in its build environment.
+ */
+const isNetlify = process.env.NETLIFY === "true";
+
+if (!isNetlify) {
   const app = createServer();
   const port = process.env.PORT || 3000;
 
