@@ -1,18 +1,26 @@
 import { RequestHandler } from "express";
 import { createClient } from "@supabase/supabase-js";
 
-// Use service role key for server-side operations (bypasses RLS)
+// Get env variables
 const supabaseUrl = process.env.VITE_SUPABASE_URL as string;
 const supabaseServiceKey = process.env.SECRET_KEY as string;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error("Missing Supabase credentials in server environment");
-}
+// Safe initialization (prevents build crash)
+let supabase: any = null;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.warn("Supabase credentials missing during build");
+} else {
+  supabase = createClient(supabaseUrl, supabaseServiceKey);
+}
 
 export const handleUploadPdf: RequestHandler = async (req, res) => {
   try {
+    // Check if supabase is initialized
+    if (!supabase) {
+      return res.status(500).json({ error: "Supabase not configured" });
+    }
+
     const { fileName, fileData } = req.body;
 
     if (!fileName || !fileData) {
@@ -28,7 +36,7 @@ export const handleUploadPdf: RequestHandler = async (req, res) => {
       .upload(fileName, buffer, {
         cacheControl: "3600",
         upsert: false,
-        contentType: "application/pdf"
+        contentType: "application/pdf",
       });
 
     if (error) {
@@ -39,7 +47,7 @@ export const handleUploadPdf: RequestHandler = async (req, res) => {
     res.json({
       success: true,
       message: "PDF uploaded successfully",
-      data
+      data,
     });
   } catch (error: any) {
     console.error("PDF upload error:", error);
