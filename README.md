@@ -1,6 +1,5 @@
 ```markdown
 # AI Wellness - Personal AI Health Advisor
-<img width="1642" height="865" alt="image" src="https://github.com/user-attachments/assets/d09914da-241a-4b6f-bdf2-b7e57a464400" />
 
 A production-ready full-stack medical AI application providing intelligent diagnosis support, real-time health monitoring, and clinical decision-making powered by advanced AI technology.
 
@@ -21,11 +20,18 @@ A production-ready full-stack medical AI application providing intelligent diagn
 - **APIs**: Gemini 2.5 Flash for AI responses
 - **Storage**: Supabase Storage for PDF files
 - **Testing**: Vitest
-- **Authentication**: Clerk
+- **Authentication
+
+**: Clerk
 
 ## 📋 Project Structure
 
 ```
+
+<img width="1642" height="865" alt="image" src="https://github.com/user-attachments/assets/d09914da-241a-4b6f-bdf2-b7e57a464400" />
+
+<br> 
+
 client/                    # React SPA frontend
 ├── pages/                 # Route pages (Index.tsx, Health.tsx, PersonalDetails.tsx)
 ├── components/            
