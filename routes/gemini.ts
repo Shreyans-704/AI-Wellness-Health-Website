@@ -17,8 +17,10 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // ✅ WORKING MODEL - using official SDK
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // ✅ ONLY THIS MODEL WORKS RELIABLY
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash-latest",
+    });
 
     const result = await model.generateContent(query);
     const response = await result.response;
@@ -28,6 +30,9 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
 
   } catch (err) {
     console.error("Gemini error:", err);
-    res.status(500).json({ error: "AI failed", response: "Try again later" });
+    res.status(500).json({
+      error: "Failed to get AI response",
+      response: "Something went wrong. Try again.",
+    });
   }
 };
