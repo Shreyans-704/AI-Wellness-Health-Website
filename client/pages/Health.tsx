@@ -5,29 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Brain, Heart, AlertTriangle, Download, User, Activity, Menu, X, RefreshCw } from "lucide-react";
+import { Brain, Heart, AlertTriangle, Download, User, Activity, Menu, X, RefreshCw, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import jsPDF from "jspdf";
 import { supabase } from '@/lib/supabase';
 
 interface PersonalInfo {
-  first_name: string;
-  last_name: string;
+  full_name: string;
   age: number;
   gender: string;
-  height_cm: number;
-  weight_kg: number;
-  bmi: number;
-  blood_group: string;
   allergies: string;
   current_medications: string;
   medical_history: string;
-  phone: string;
-  email: string;
-  insurance_provider: string;
-  policy_number: string;
-  emergency_contact_name: string;
-  emergency_contact_phone: string;
 }
 
 interface HealthAssessment {
@@ -40,8 +30,6 @@ interface HealthAssessment {
     spO2: number;
     temperature: number;
   };
-  additionalSymptoms: string;
-  familyHistory: string;
 }
 
 const Health: React.FC = () => {
@@ -57,9 +45,7 @@ const Health: React.FC = () => {
       heartRate: 0,
       spO2: 0,
       temperature: 0
-    },
-    additionalSymptoms: '',
-    familyHistory: ''
+    }
   });
   
   const [loading, setLoading] = useState(false);
@@ -67,34 +53,22 @@ const Health: React.FC = () => {
   const [error, setError] = useState('');
   const [showPersonalInfoForm, setShowPersonalInfoForm] = useState(false);
 
-  // Symptom options
+  // Symptom options - Essential only
   const symptomOptions = [
     'Chest Pain',
     'Shortness of Breath',
     'Palpitations',
     'Fatigue',
-    'Dizziness',
-    'Syncope (Fainting)',
-    'Cyanosis (Blue lips/skin)',
-    'Nausea',
-    'Sweating',
-    'Irregular Heartbeat',
-    'Swelling in legs/ankles',
-    'Rapid breathing'
+    'Dizziness'
   ];
 
-  // Risk factor options
+  // Risk factor options - Essential only
   const riskFactorOptions = [
     'Smoking',
-    'Alcohol Use',
     'Diabetes',
     'Hypertension',
-    'Family History of Heart Disease',
     'High Cholesterol',
-    'Sedentary Lifestyle',
-    'Obesity',
-    'Stress',
-    'Previous Heart Attack'
+    'Stress'
   ];
 
   // Fetch latest personal information from database
@@ -118,23 +92,12 @@ const Health: React.FC = () => {
       if (data && data.length > 0) {
         const personalData = data[0];
         setPersonalInfo({
-          first_name: personalData.first_name,
-          last_name: personalData.last_name,
+          full_name: personalData.full_name,
           age: personalData.age,
           gender: personalData.gender,
-          height_cm: personalData.height_cm,
-          weight_kg: personalData.weight_kg,
-          bmi: personalData.bmi,
-          blood_group: personalData.blood_group,
           allergies: personalData.allergies,
           current_medications: personalData.current_medications,
-          medical_history: personalData.medical_history,
-          phone: personalData.phone,
-          email: personalData.email,
-          insurance_provider: personalData.insurance_provider,
-          policy_number: personalData.policy_number,
-          emergency_contact_name: personalData.emergency_contact_name,
-          emergency_contact_phone: personalData.emergency_contact_phone
+          medical_history: personalData.medical_history
         });
       } else {
         setError('No personal information found. Please complete the Personal Details form first.');
@@ -153,13 +116,6 @@ const Health: React.FC = () => {
         ...personalInfo,
         [field]: value
       };
-      
-      // Recalculate BMI if height or weight changes
-      if (field === 'height_cm' || field === 'weight_kg') {
-        const height = field === 'height_cm' ? Number(value) : personalInfo.height_cm;
-        const weight = field === 'weight_kg' ? Number(value) : personalInfo.weight_kg;
-        updatedInfo.bmi = parseFloat((weight / Math.pow(height / 100, 2)).toFixed(1));
-      }
       
       setPersonalInfo(updatedInfo);
     }
@@ -200,10 +156,6 @@ const Health: React.FC = () => {
     if (personalInfo?.age && personalInfo.age > 65) score += 2;
     else if (personalInfo?.age && personalInfo.age > 50) score += 1;
     
-    // BMI factor
-    if (personalInfo?.bmi && personalInfo.bmi > 30) score += 2;
-    else if (personalInfo?.bmi && personalInfo.bmi > 25) score += 1;
-    
     // Symptoms
     const highRiskSymptoms = ['Chest Pain', 'Shortness of Breath', 'Palpitations', 'Syncope (Fainting)'];
     const presentHighRiskSymptoms = healthAssessment.symptoms.filter(s => highRiskSymptoms.includes(s));
@@ -234,9 +186,6 @@ const Health: React.FC = () => {
     // Simulate processing time for realistic experience
     setTimeout(() => {
       const riskScore = calculateRiskScore();
-      const bmiCategory = personalInfo.bmi < 18.5 ? 'Underweight' : 
-                         personalInfo.bmi < 25 ? 'Normal weight' : 
-                         personalInfo.bmi < 30 ? 'Overweight' : 'Obese';
 
       // Determine urgency level
       let urgencyLevel = 'LOW';
@@ -244,41 +193,35 @@ const Health: React.FC = () => {
       
       if (riskScore >= 7) {
         urgencyLevel = 'URGENT';
-        urgencyReasoning = 'High-risk symptoms and factors present. Immediate cardiology consultation recommended.';
+        urgencyReasoning = 'High-risk symptoms and factors present. Immediate medical consultation recommended.';
       } else if (riskScore >= 4) {
         urgencyLevel = 'MODERATE';
-        urgencyReasoning = 'Several risk factors identified. Cardiology consultation within 2-4 weeks recommended.';
+        urgencyReasoning = 'Several risk factors identified. Medical consultation within 2-4 weeks recommended.';
       }
 
       // Generate comprehensive report
       const generatedReport = `
-📋 PRELIMINARY SHD ASSESSMENT
-Dear ${personalInfo.first_name} ${personalInfo.last_name},
+📋 PRELIMINARY HEALTH ASSESSMENT
+Dear ${personalInfo.full_name},
 
-Thank you for completing your Wellness AI Structural Heart Disease screening. This preliminary assessment is designed to help identify potential cardiac concerns that may benefit from further evaluation by a cardiologist.
+Thank you for completing your Wellness AI health screening. This preliminary assessment is designed to help identify potential health concerns that may benefit from further evaluation by a healthcare professional.
 
 👤 PATIENT INFORMATION SUMMARY
-• Name: ${personalInfo.first_name} ${personalInfo.last_name}
+• Name: ${personalInfo.full_name}
 • Age: ${personalInfo.age} years (${personalInfo.age < 18 ? 'Pediatric' : personalInfo.age < 65 ? 'Adult' : 'Senior'} category)
 • Gender: ${personalInfo.gender}
-• Physical Profile: ${personalInfo.height_cm} cm, ${personalInfo.weight_kg} kg (BMI: ${personalInfo.bmi} - ${bmiCategory})
-• Blood Type: ${personalInfo.blood_group}
-• Contact: ${personalInfo.phone}
-• Insurance: ${personalInfo.insurance_provider} (Policy: ${personalInfo.policy_number})
-• Emergency Contact: ${personalInfo.emergency_contact_name} (${personalInfo.emergency_contact_phone})
 
-🎯 ESTIMATED RISK SCORE FOR STRUCTURAL HEART DISEASE
+🎯 ESTIMATED RISK SCORE
 Risk Score: ${riskScore}/10
 
 Risk Factors Contributing to Score:
 ${personalInfo.age > 65 ? '• Age factor: Senior category (+2 points)' : personalInfo.age > 50 ? '• Age factor: Middle-age category (+1 point)' : '• Age factor: Low risk'}
-${personalInfo.bmi > 30 ? '• BMI factor: Obesity category (+2 points)' : personalInfo.bmi > 25 ? '• BMI factor: Overweight category (+1 point)' : '• BMI factor: Normal range'}
-${healthAssessment.symptoms.filter(s => ['Chest Pain', 'Shortness of Breath', 'Palpitations', 'Syncope (Fainting)'].includes(s)).length > 0 ? 
-  `• High-risk symptoms present: ${healthAssessment.symptoms.filter(s => ['Chest Pain', 'Shortness of Breath', 'Palpitations', 'Syncope (Fainting)'].includes(s)).join(', ')} (+${healthAssessment.symptoms.filter(s => ['Chest Pain', 'Shortness of Breath', 'Palpitations', 'Syncope (Fainting)'].includes(s)).length * 2} points)` : 
-  '• No high-risk symptoms identified'}
-${healthAssessment.riskFactors.filter(f => ['Diabetes', 'Hypertension', 'Family History of Heart Disease', 'Smoking'].includes(f)).length > 0 ?
-  `• Critical risk factors: ${healthAssessment.riskFactors.filter(f => ['Diabetes', 'Hypertension', 'Family History of Heart Disease', 'Smoking'].includes(f)).join(', ')} (+${healthAssessment.riskFactors.filter(f => ['Diabetes', 'Hypertension', 'Family History of Heart Disease', 'Smoking'].includes(f)).length} points)` :
-  '• No critical risk factors identified'}
+${healthAssessment.symptoms.filter(s => ['Chest Pain', 'Shortness of Breath', 'Palpitations', 'Dizziness'].includes(s)).length > 0 ? 
+  `• Concerning symptoms present: ${healthAssessment.symptoms.filter(s => ['Chest Pain', 'Shortness of Breath', 'Palpitations', 'Dizziness'].includes(s)).join(', ')} (+${healthAssessment.symptoms.filter(s => ['Chest Pain', 'Shortness of Breath', 'Palpitations', 'Dizziness'].includes(s)).length * 2} points)` : 
+  '• No concerning symptoms identified'}
+${healthAssessment.riskFactors.filter(f => ['Diabetes', 'Hypertension', 'High Cholesterol', 'Smoking'].includes(f)).length > 0 ?
+  `• Risk factors identified: ${healthAssessment.riskFactors.filter(f => ['Diabetes', 'Hypertension', 'High Cholesterol', 'Smoking'].includes(f)).join(', ')} (+${healthAssessment.riskFactors.filter(f => ['Diabetes', 'Hypertension', 'High Cholesterol', 'Smoking'].includes(f)).length} points)` :
+  '• No major risk factors identified'}
 
 📊 CURRENT VITAL SIGNS
 • Blood Pressure: ${healthAssessment.vitals.systolicBP}/${healthAssessment.vitals.diastolicBP} mmHg ${healthAssessment.vitals.systolicBP > 140 || healthAssessment.vitals.diastolicBP > 90 ? '(ELEVATED - Contributing to risk)' : '(Normal range)'}
@@ -324,16 +267,14 @@ When you visit your healthcare provider, mention:
 
 Symptoms: "${healthAssessment.symptoms.join(', ') || 'No specific symptoms reported'}"
 Risk Factors: "${healthAssessment.riskFactors.join(', ') || 'No major risk factors identified'}"
-Additional Concerns: "${healthAssessment.additionalSymptoms || 'None reported'}"
-Family History: "${healthAssessment.familyHistory || 'No family history of heart disease reported'}"
 
 Key phrases to use:
 • "I completed a Wellness AI screening with a risk score of ${riskScore}/10"
-• "I'm concerned about structural heart disease based on my symptoms"
-• "I would like a comprehensive cardiac evaluation including echocardiogram"
+• "I'm concerned about my health based on my symptoms"
+• "I would like a comprehensive health evaluation"
 
-🏥 RECOMMENDED CARDIAC SPECIALISTS & HOSPITALS
-Based on your location (${personalInfo.phone.substring(0, 5)} area):
+🏥 RECOMMENDED SPECIALISTS & HOSPITALS
+Based on your location:
 
 Tier 1 Cardiac Centers:
 • Regional Cardiovascular Institute
@@ -373,53 +314,49 @@ SEEK EMERGENCY CARE IMMEDIATELY if you experience:
 
 Lifestyle Recommendations:
 • Monitor blood pressure regularly
-• Maintain healthy weight (current BMI: ${personalInfo.bmi})
-• Follow heart-healthy diet
+• Follow a balanced diet
 • Regular exercise as tolerated
-• Medication compliance
+• Medication compliance (if applicable)
 • Avoid smoking and excessive alcohol
 • Stress management techniques
 
 Follow-up Schedule:
-• ${urgencyLevel === 'URGENT' ? 'Cardiologist within 24-48 hours' : 
-    urgencyLevel === 'MODERATE' ? 'Cardiologist within 2-4 weeks' :
-    'Annual cardiac screening'}
+• ${urgencyLevel === 'URGENT' ? 'Healthcare provider consultation within 24-48 hours' : 
+    urgencyLevel === 'MODERATE' ? 'Healthcare provider consultation within 2-4 weeks' :
+    'Annual health screening'}
 • Blood pressure monitoring: Weekly
 • Symptom tracking: Daily
 
-👨‍⚕️ DOCTOR'S SUMMARY (For Healthcare Providers)
+👨‍⚕️ CLINICAL SUMMARY (For Healthcare Providers)
 
-Patient: ${personalInfo.first_name} ${personalInfo.last_name}, ${personalInfo.age}y ${personalInfo.gender}
-WellnessAI Risk Score: ${riskScore}/10 (${urgencyLevel} priority)
+Patient: ${personalInfo.full_name}, ${personalInfo.age}y ${personalInfo.gender}
+AI Wellness Risk Score: ${riskScore}/10 (${urgencyLevel} priority)
 
-Clinical Presentation:
-• BMI: ${personalInfo.bmi} (${bmiCategory})
+Current Status:
 • BP: ${healthAssessment.vitals.systolicBP}/${healthAssessment.vitals.diastolicBP} mmHg
 • HR: ${healthAssessment.vitals.heartRate} BPM
 • SpO2: ${healthAssessment.vitals.spO2}%
-• Symptoms: ${healthAssessment.symptoms.join(', ') || 'None'}
-• Risk Factors: ${healthAssessment.riskFactors.join(', ') || 'None'}
+• Temperature: ${healthAssessment.vitals.temperature}°F
+• Symptoms: ${healthAssessment.symptoms.join(', ') || 'None reported'}
+• Risk Factors: ${healthAssessment.riskFactors.join(', ') || 'None identified'}
 
 Medical History:
 • Allergies: ${personalInfo.allergies}
 • Current Medications: ${personalInfo.current_medications}
-• Past Medical History: ${personalInfo.medical_history}
-• Family History: ${healthAssessment.familyHistory || 'Non-contributory'}
+• Medical History: ${personalInfo.medical_history}
 
 Recommendations:
-1. ${urgencyLevel === 'URGENT' ? 'STAT' : urgencyLevel === 'MODERATE' ? 'Urgent' : 'Routine'} cardiology referral
-2. Echocardiogram and ECG
-3. Basic metabolic panel and CBC
-4. Consider stress testing if indicated
-
-Insurance: ${personalInfo.insurance_provider} (${personalInfo.policy_number})
+1. ${urgencyLevel === 'URGENT' ? 'STAT' : urgencyLevel === 'MODERATE' ? 'Urgent' : 'Routine'} healthcare provider appointment
+2. Complete vital signs assessment
+3. Consider additional diagnostic testing as clinically indicated
+4. Follow-up based on urgency level
 
 ---
 
 ⚠️ MEDICAL DISCLAIMER
-This WellnessAI report is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. It is designed to assist in identifying potential cardiac concerns that warrant professional medical evaluation. Always consult with qualified healthcare professionals for proper medical assessment and treatment decisions.
+This AI Wellness report is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. It is designed to assist in identifying potential cardiac concerns that warrant professional medical evaluation. Always consult with qualified healthcare professionals for proper medical assessment and treatment decisions.
 
-Generated: ${new Date().toLocaleDateString()} | WellnessAI v2.0
+Generated: ${new Date().toLocaleDateString()} | AI Wellness v2.0
 Report ID: ${Date.now().toString(36).toUpperCase()}`;
 
       setReport(generatedReport);
@@ -430,172 +367,223 @@ Report ID: ${Date.now().toString(36).toUpperCase()}`;
   const downloadReport = () => {
     if (!report || !personalInfo) return;
 
-    const reportContent = `WellnessAI Screening Report
-Structural Heart Disease Analysis
+    const reportContent = `AI Wellness Screening Report
+Health Assessment Analysis
 
 Patient Information:
-Name: ${personalInfo.first_name} ${personalInfo.last_name}
+Name: ${personalInfo.full_name}
 Age: ${personalInfo.age} years
 Gender: ${personalInfo.gender}
 Date: ${new Date().toLocaleDateString()}
 
 ${report}
 
-Generated by WellnessAI
+Generated by AI Wellness
 ${new Date().toLocaleDateString()}`;
 
     const blob = new Blob([reportContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${personalInfo.first_name}_${personalInfo.last_name}_SHD_Report_${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `${personalInfo.full_name.replace(/\s+/g, '_')}_Health_Report_${new Date().toISOString().split('T')[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  const generatePDFReport = () => {
+  const generatePDFReport = async () => {
     if (!report || !personalInfo) return;
 
-    const doc = new jsPDF();
+    setLoading(true);
 
-    // Header
-    doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text("WellnessAI - Health Screening Report", 20, 25);
-    
-    doc.setFontSize(14);
-    doc.text("Structural Heart Disease Analysis", 20, 35);
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 20;
+      const contentWidth = pageWidth - 2 * margin;
 
-    // Line under header
-    doc.setLineWidth(0.5);
-    doc.line(20, 40, 190, 40);
+      let yPosition = 20;
 
-    let yPosition = 50;
-    const lineHeight = 6;
-    const pageHeight = doc.internal.pageSize.height;
-    const margin = 20;
-
-    // Helper function to add text with page breaks
-    const addText = (text: string, fontSize: number = 10, isBold: boolean = false) => {
-      if (yPosition > pageHeight - 30) {
-        doc.addPage();
-        yPosition = 20;
-      }
+      // Professional Header
+      doc.setFillColor(30, 58, 138); // Dark blue
+      doc.rect(0, 0, pageWidth, 50, 'F');
       
-      doc.setFontSize(fontSize);
-      if (isBold) {
-        doc.setFont("helvetica", "bold");
-      } else {
-        doc.setFont("helvetica", "normal");
-      }
+      // Title
+      doc.setFontSize(24);
+      doc.setTextColor(255, 255, 255);
+      doc.text("AI Wellness", margin, 25);
       
-      const lines = doc.splitTextToSize(text, 170);
-      lines.forEach((line: string) => {
+      // Subtitle
+      doc.setFontSize(10);
+      doc.setTextColor(200, 200, 200);
+      doc.text("Health Assessment Report", margin, 35);
+
+      yPosition = 65;
+
+      // Helper function to add section with better formatting
+      const addSection = (title: string) => {
+        if (yPosition > pageHeight - 40) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        doc.setFontSize(13);
+        doc.setTextColor(30, 58, 138);
+        doc.text(title, margin, yPosition);
+        doc.setDrawColor(30, 58, 138);
+        doc.line(margin, yPosition + 2, margin + 80, yPosition + 2);
+        yPosition += 10;
+      };
+
+      // Helper function to add field with better formatting
+      const addFieldRow = (label: string, value: string) => {
+        if (!value) return;
+        
         if (yPosition > pageHeight - 30) {
           doc.addPage();
           yPosition = 20;
         }
-        doc.text(line, margin, yPosition);
-        yPosition += lineHeight;
+
+        doc.setFontSize(11);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`${label}:`, margin, yPosition);
+        
+        doc.setFontSize(11);
+        doc.setTextColor(30, 30, 30);
+        const fieldWidth = contentWidth - 70;
+        const lines = doc.splitTextToSize(value, fieldWidth);
+        doc.text(lines, margin + 70, yPosition);
+        yPosition += Math.max(6, lines.length * 5) + 3;
+      };
+
+      // Patient Information Section
+      addSection("Patient Information");
+      addFieldRow("Full Name", personalInfo.full_name);
+      addFieldRow("Age", personalInfo.age + " years");
+      addFieldRow("Gender", personalInfo.gender.charAt(0).toUpperCase() + personalInfo.gender.slice(1));
+
+      yPosition += 5;
+
+      // Health Assessment Section
+      addSection("Health Assessment");
+      addFieldRow("Symptoms", healthAssessment.symptoms.length > 0 ? healthAssessment.symptoms.join(", ") : "None");
+      addFieldRow("Risk Factors", healthAssessment.riskFactors.length > 0 ? healthAssessment.riskFactors.join(", ") : "None");
+
+      yPosition += 5;
+
+      // Vital Signs Section
+      addSection("Vital Signs");
+      addFieldRow("Blood Pressure", `${healthAssessment.vitals.systolicBP}/${healthAssessment.vitals.diastolicBP} mmHg`);
+      addFieldRow("Heart Rate", `${healthAssessment.vitals.heartRate} BPM`);
+      addFieldRow("Oxygen Saturation", `${healthAssessment.vitals.spO2}%`);
+      addFieldRow("Temperature", `${healthAssessment.vitals.temperature}°F`);
+
+      yPosition += 5;
+
+      // Medical History Section
+      addSection("Medical History");
+      addFieldRow("Medical History", personalInfo.medical_history);
+      addFieldRow("Current Medications", personalInfo.current_medications);
+      addFieldRow("Allergies", personalInfo.allergies);
+
+      yPosition += 5;
+
+      // Risk Score Section
+      const riskScore = calculateRiskScore();
+      addSection("Risk Assessment");
+      let riskLevel = "";
+      if (riskScore >= 7) {
+        riskLevel = "URGENT - Immediate consultation recommended";
+      } else if (riskScore >= 4) {
+        riskLevel = "MODERATE - Consultation recommended within 2-4 weeks";
+      } else {
+        riskLevel = "LOW - Annual screening recommended";
+      }
+      addFieldRow("Risk Score", `${riskScore}/10 - ${riskLevel}`);
+
+      yPosition += 10;
+
+      // Footer with borders
+      doc.setDrawColor(30, 58, 138);
+      doc.line(margin, pageHeight - 25, pageWidth - margin, pageHeight - 25);
+      
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, margin, pageHeight - 18);
+      doc.text("This document is confidential and for authorized healthcare professionals only.", margin, pageHeight - 12);
+      doc.text("AI Wellness - Health Assessment System | www.aiwellness.com", margin, pageHeight - 6);
+
+      // Save health data to Supabase health_data table
+      const { error: saveError } = await supabase
+        .from('health_data')
+        .insert([{
+          user_id: personalInfo.full_name,
+          blood_pressure: `${healthAssessment.vitals.systolicBP}/${healthAssessment.vitals.diastolicBP}`,
+          heart_rate: healthAssessment.vitals.heartRate,
+          blood_glucose: 0, // Placeholder - not collected in form
+          cholesterol: 0 // Placeholder - not collected in form
+        }]);
+
+      if (saveError) {
+        console.error('Error saving health data:', saveError);
+        throw new Error('Failed to save health data: ' + saveError.message);
+      }
+
+      console.log('Health data saved successfully to database');
+
+      // Generate filename with patient folder
+      const patientFolderName = personalInfo.full_name.replace(/\s+/g, "_");
+      const fileName = `${patientFolderName}_health_report_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fullPath = `${patientFolderName}/${fileName}`;
+
+      // Convert PDF to base64 for server upload
+      const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+      // Upload to server endpoint
+      const uploadResponse = await fetch('/api/upload-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fileName: fullPath,
+          fileData: pdfBase64
+        })
       });
-    };
 
-    // Patient Information
-    addText("PATIENT INFORMATION", 12, true);
-    yPosition += 3;
-    addText(`Name: ${personalInfo.first_name} ${personalInfo.last_name}`);
-    addText(`Age: ${personalInfo.age} years`);
-    addText(`Gender: ${personalInfo.gender}`);
-    addText(`BMI: ${personalInfo.bmi}`);
-    addText(`Blood Group: ${personalInfo.blood_group}`);
-    addText(`Contact: ${personalInfo.phone}`);
-    addText(`Email: ${personalInfo.email}`);
-    addText(`Insurance: ${personalInfo.insurance_provider} (${personalInfo.policy_number})`);
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || 'Failed to upload PDF');
+      }
 
-    yPosition += 5;
+      const uploadResult = await uploadResponse.json();
+      console.log('Health report uploaded successfully:', uploadResult);
+      alert("Health report generated and stored successfully!");
 
-    // Risk Assessment
-    const riskScore = calculateRiskScore();
-    addText("RISK ASSESSMENT", 12, true);
-    yPosition += 3;
-    addText(`Risk Score: ${riskScore}/10`);
-    
-    if (healthAssessment.symptoms.length > 0) {
-      addText(`Symptoms: ${healthAssessment.symptoms.join(', ')}`);
+      // Download the PDF to user's computer
+      doc.save(fileName);
+
+      // Reset the form after successful download and upload
+      setHealthAssessment({
+        symptoms: [],
+        riskFactors: [],
+        vitals: {
+          systolicBP: 0,
+          diastolicBP: 0,
+          heartRate: 0,
+          spO2: 0,
+          temperature: 0
+        }
+      });
+      setReport('');
+
+    } catch (error: any) {
+      console.error('Error generating/uploading health report:', error);
+      alert('Error uploading health report: ' + error.message);
+    } finally {
+      setLoading(false);
     }
-    
-    if (healthAssessment.riskFactors.length > 0) {
-      addText(`Risk Factors: ${healthAssessment.riskFactors.join(', ')}`);
-    }
-
-    yPosition += 5;
-
-    // Vital Signs
-    addText("VITAL SIGNS", 12, true);
-    yPosition += 3;
-    addText(`Blood Pressure: ${healthAssessment.vitals.systolicBP}/${healthAssessment.vitals.diastolicBP} mmHg`);
-    addText(`Heart Rate: ${healthAssessment.vitals.heartRate} BPM`);
-    addText(`Oxygen Saturation: ${healthAssessment.vitals.spO2}%`);
-    addText(`Temperature: ${healthAssessment.vitals.temperature}°F`);
-
-    yPosition += 5;
-
-    // Recommendations
-    addText("RECOMMENDATIONS", 12, true);
-    yPosition += 3;
-    
-    let urgencyLevel = 'LOW';
-    if (riskScore >= 7) {
-      urgencyLevel = 'URGENT';
-      addText("URGENT: Immediate cardiology consultation recommended within 24 hours.", 11, true);
-    } else if (riskScore >= 4) {
-      urgencyLevel = 'MODERATE';
-      addText("MODERATE: Schedule cardiology consultation within 2-4 weeks.", 11, true);
-    } else {
-      addText("LOW RISK: Annual cardiac screening recommended.", 11, true);
-    }
-
-    yPosition += 3;
-    addText("Suggested Tests:");
-    addText("• Electrocardiogram (ECG/EKG)");
-    addText("• Echocardiogram");
-    addText("• Chest X-ray");
-    addText("• Complete Blood Count (CBC)");
-    addText("• Comprehensive Metabolic Panel");
-    addText("• Lipid Panel");
-
-    yPosition += 5;
-
-    // Medical History
-    addText("MEDICAL INFORMATION", 12, true);
-    yPosition += 3;
-    addText(`Allergies: ${personalInfo.allergies}`);
-    addText(`Current Medications: ${personalInfo.current_medications}`);
-    addText(`Medical History: ${personalInfo.medical_history}`);
-    
-    if (healthAssessment.familyHistory) {
-      addText(`Family History: ${healthAssessment.familyHistory}`);
-    }
-
-    yPosition += 10;
-
-    // Disclaimer
-    addText("MEDICAL DISCLAIMER", 12, true);
-    yPosition += 3;
-    addText("This WellnessAI report is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. Always consult with qualified healthcare professionals for proper medical assessment and treatment decisions.", 9);
-
-    // Footer
-    const finalPageHeight = doc.internal.pageSize.height;
-    doc.setFontSize(8);
-    doc.setTextColor(128, 128, 128);
-    doc.text(`Generated: ${new Date().toLocaleDateString()} | WellnessAI v2.0`, 20, finalPageHeight - 15);
-    doc.text(`Report ID: ${Date.now().toString(36).toUpperCase()}`, 20, finalPageHeight - 10);
-
-    // Save the PDF
-    const fileName = `${personalInfo.first_name}_${personalInfo.last_name}_Health_Report_${new Date().toISOString().split('T')[0]}.pdf`;
-    doc.save(fileName);
   };
 
   if (loadingPersonalInfo) {
@@ -660,32 +648,21 @@ ${new Date().toLocaleDateString()}`;
               <CardContent>
                 {!showPersonalInfoForm ? (
                   <div className="grid md:grid-cols-3 gap-4 text-sm">
-                    <div><strong>Name:</strong> {personalInfo.first_name} {personalInfo.last_name}</div>
+                    <div><strong>Name:</strong> {personalInfo.full_name}</div>
                     <div><strong>Age:</strong> {personalInfo.age} years</div>
                     <div><strong>Gender:</strong> {personalInfo.gender}</div>
-                    <div><strong>Height:</strong> {personalInfo.height_cm} cm</div>
-                    <div><strong>Weight:</strong> {personalInfo.weight_kg} kg</div>
-                    <div><strong>BMI:</strong> {personalInfo.bmi}</div>
-                    <div><strong>Blood Group:</strong> {personalInfo.blood_group}</div>
-                    <div><strong>Phone:</strong> {personalInfo.phone}</div>
-                    <div><strong>Insurance:</strong> {personalInfo.insurance_provider}</div>
+                    <div className="md:col-span-3"><strong>Medical History:</strong> {personalInfo.medical_history}</div>
+                    <div className="md:col-span-3"><strong>Current Medications:</strong> {personalInfo.current_medications}</div>
+                    <div className="md:col-span-3"><strong>Allergies:</strong> {personalInfo.allergies}</div>
                   </div>
                 ) : (
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="fullName">Full Name</Label>
                       <Input
-                        id="firstName"
-                        value={personalInfo.first_name}
-                        onChange={(e) => updatePersonalInfo('first_name', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={personalInfo.last_name}
-                        onChange={(e) => updatePersonalInfo('last_name', e.target.value)}
+                        id="fullName"
+                        value={personalInfo.full_name}
+                        onChange={(e) => updatePersonalInfo('full_name', e.target.value)}
                       />
                     </div>
                     <div>
@@ -705,46 +682,13 @@ ${new Date().toLocaleDateString()}`;
                         onChange={(e) => updatePersonalInfo('gender', e.target.value)}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="height">Height (cm)</Label>
-                      <Input
-                        id="height"
-                        type="number"
-                        value={personalInfo.height_cm}
-                        onChange={(e) => updatePersonalInfo('height_cm', parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="weight">Weight (kg)</Label>
-                      <Input
-                        id="weight"
-                        type="number"
-                        value={personalInfo.weight_kg}
-                        onChange={(e) => updatePersonalInfo('weight_kg', parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="bloodGroup">Blood Group</Label>
-                      <Input
-                        id="bloodGroup"
-                        value={personalInfo.blood_group}
-                        onChange={(e) => updatePersonalInfo('blood_group', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        value={personalInfo.phone}
-                        onChange={(e) => updatePersonalInfo('phone', e.target.value)}
-                      />
-                    </div>
                     <div className="md:col-span-2">
-                      <Label htmlFor="allergies">Allergies</Label>
+                      <Label htmlFor="medicalHistory">Medical History</Label>
                       <Textarea
-                        id="allergies"
-                        value={personalInfo.allergies}
-                        onChange={(e) => updatePersonalInfo('allergies', e.target.value)}
+                        id="medicalHistory"
+                        value={personalInfo.medical_history}
+                        onChange={(e) => updatePersonalInfo('medical_history', e.target.value)}
+                        rows={3}
                       />
                     </div>
                     <div className="md:col-span-2">
@@ -753,6 +697,16 @@ ${new Date().toLocaleDateString()}`;
                         id="medications"
                         value={personalInfo.current_medications}
                         onChange={(e) => updatePersonalInfo('current_medications', e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="allergies">Allergies</Label>
+                      <Textarea
+                        id="allergies"
+                        value={personalInfo.allergies}
+                        onChange={(e) => updatePersonalInfo('allergies', e.target.value)}
+                        rows={3}
                       />
                     </div>
                   </div>
@@ -868,34 +822,6 @@ ${new Date().toLocaleDateString()}`;
                   </div>
                 </div>
 
-                {/* Additional Information */}
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="additionalSymptoms">Additional Symptoms or Concerns</Label>
-                    <Textarea
-                      id="additionalSymptoms"
-                      placeholder="Describe any other symptoms..."
-                      value={healthAssessment.additionalSymptoms}
-                      onChange={(e) => setHealthAssessment(prev => ({
-                        ...prev,
-                        additionalSymptoms: e.target.value
-                      }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="familyHistory">Family History of Heart Disease</Label>
-                    <Textarea
-                      id="familyHistory"
-                      placeholder="Describe family history of cardiac conditions..."
-                      value={healthAssessment.familyHistory}
-                      onChange={(e) => setHealthAssessment(prev => ({
-                        ...prev,
-                        familyHistory: e.target.value
-                      }))}
-                    />
-                  </div>
-                </div>
-
                 {/* Generate Report Button */}
                 <Button
                   onClick={generateReport}
@@ -911,7 +837,7 @@ ${new Date().toLocaleDateString()}`;
                   ) : (
                     <>
                       <Brain className="h-4 w-4 mr-2" />
-                      Generate WellnessAI Report
+                      Generate AI Wellness Report
                     </>
                   )}
                 </Button>
@@ -967,11 +893,21 @@ ${new Date().toLocaleDateString()}`;
                       </Button>
                       <Button
                         onClick={generatePDFReport}
+                        disabled={loading}
                         className="flex-1"
                         variant="outline"
                       >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download PDF
+                        {loading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -988,6 +924,7 @@ ${new Date().toLocaleDateString()}`;
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

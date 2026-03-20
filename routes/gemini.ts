@@ -30,20 +30,48 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
       });
     }
 
-    // Construct health-focused prompt
-    const healthPrompt = `You are a helpful health assistant. The user has asked: "${query}". 
-    
-    Please provide a clear, informative response about their health question. Keep in mind:
-    - Provide general health information and guidance
-    - Always recommend consulting healthcare professionals for serious concerns
-    - Be empathetic and supportive
-    - Keep responses concise but comprehensive
-    - Include disclaimers when appropriate
-    
-    Response:`;
+    // Construct adaptive health-focused prompt based on query complexity
+    const healthPrompt = `You are an AI Health Assistant.
+
+Your response style must adapt based on the user's input:
+
+1. If the user input is short, simple, or casual (e.g., "hi", "fever?", "headache"), 
+   → respond in a short, friendly, and concise way (2–4 lines maximum).
+   → avoid long explanations, sections, or formatting.
+
+2. If the user asks a detailed or complex question, 
+   → provide a structured, detailed response with headings, explanations, and helpful insights.
+
+3. Always maintain a polite, supportive, and easy-to-understand tone.
+
+4. Avoid overwhelming the user with unnecessary information unless asked.
+
+5. Only include disclaimers when the query is serious or medical-related. 
+   Do NOT include long disclaimers for casual greetings or simple questions.
+
+6. Never provide diagnosis or prescriptions. Keep responses informational.
+
+Examples for reference:
+
+User: "hi"
+→ "Hello! How can I help you with your health today?"
+
+User: "fever"
+→ "A fever is usually a sign your body is fighting an infection. Are you experiencing any other symptoms?"
+
+User: "Explain diabetes in detail"
+→ Provide a structured, detailed explanation with sections.
+
+Your goal is to match the user's intent and keep responses appropriately sized.
+
+---
+
+User Question: "${query}"
+
+Please respond appropriately based on the complexity and length of the question above.`;
 
     // Safe: don't log key in URL
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
 
     const requestBody = {
       contents: [{
@@ -55,7 +83,7 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 500,
+        maxOutputTokens: 2000,
       }
     };
 

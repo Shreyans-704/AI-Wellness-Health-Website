@@ -1,16 +1,23 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
+import FeaturesSection from "@/components/FeaturesSection";
+import Footer from "@/components/Footer";
 import { useAuth } from '@clerk/clerk-react';
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800">
+    <div className="min-h-screen">
       <Header />
-      <main>
-        <HeroSection />
+      <main className="home-bg">
+        {/* Content Sections */}
+        <div className="relative z-10">
+          <HeroSection />
+          <FeaturesSection />
+        </div>
       </main>
+      <Footer />
     </div>
   );
 }

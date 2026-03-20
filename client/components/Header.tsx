@@ -12,13 +12,25 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets%2F6638b6e3f08849eb91b735b1c7b57266%2Fcdff2b8e04844f57ab85e0438404980d?format=webp&width=800"
-              alt="WellnessAI Logo"
-              className="w-10 h-10 rounded-lg"
-            />
-            <span className="text-xl font-bold text-white">WellnessAI</span>
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-10 h-10 relative flex items-center justify-center">
+              {/* Circuit Heartbeat Logo */}
+              <svg
+                viewBox="0 0 100 100"
+                className="w-10 h-10 text-teal-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                {/* Heartbeat line concept */}
+                <path d="M 20 50 L 35 50 L 40 40 L 45 60 L 50 50 L 80 50" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Circuit dots */}
+                <circle cx="20" cy="50" r="3" fill="currentColor" />
+                <circle cx="35" cy="50" r="3" fill="currentColor" />
+                <circle cx="80" cy="50" r="3" fill="currentColor" />
+              </svg>
+            </div>
+            <span className="text-xl font-bold text-white">AI Wellness</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -47,6 +59,8 @@ export default function Header() {
           <button
             className="md:hidden p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-800/50"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+            title="Toggle navigation menu"
           >
             <Menu className="h-6 w-6" />
           </button>

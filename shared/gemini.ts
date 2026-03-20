@@ -7,3 +7,4 @@ export interface GeminiQueryResponse {
   query?: string;
   error?: string;
 }
+
