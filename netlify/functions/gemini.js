@@ -45,7 +45,8 @@ exports.handler = async (event, context) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Use a model that is available on the v1beta endpoint used by this SDK in the Netlify runtime
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const result = await model.generateContent(query);
     const response = await result.response;
