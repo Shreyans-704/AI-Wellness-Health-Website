@@ -44,13 +44,30 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    // Use a model that is available on the v1beta endpoint used by this SDK in the Netlify runtime
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Call Gemini via REST v1 to avoid model/version mismatches in the SDK
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-    const result = await model.generateContent(query);
-    const response = await result.response;
-    const text = response.text();
+    const payload = {
+      contents: [
+        {
+          parts: [{ text: query }],
+        },
+      ],
+    };
+
+    const aiRes = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!aiRes.ok) {
+      const errText = await aiRes.text();
+      throw new Error(`Upstream Gemini error ${aiRes.status}: ${errText}`);
+    }
+
+    const aiJson = await aiRes.json();
+    const text = aiJson?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     return {
       statusCode: 200,
