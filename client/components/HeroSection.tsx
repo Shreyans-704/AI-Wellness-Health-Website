@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Shield, TrendingUp, Stethoscope } from "lucide-react";
 import TypewriterText from "./TypewriterText";
-import AISearch from "./AISearch";
 
 export default function HeroSection() {
   const navigate = useNavigate();
@@ -29,16 +28,6 @@ export default function HeroSection() {
               <p className="text-xl font-bold text-black max-w-3xl mx-auto">
                 Intelligent diagnosis support, real-time health monitoring, and clinical decision-making powered by advanced AI technology
               </p>
-            </div>
-
-            {/* AI Search */}
-            <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg p-6 border-2 border-blue-100">
-              <div className="flex items-center mb-4">
-                <Stethoscope className="h-5 w-5 text-blue-600 mr-2" />
-                <h3 className="font-semibold text-gray-900">Medical AI Query</h3>
-              </div>
-              <AISearch />
-              <p className="text-sm text-gray-500 mt-4">Ask about symptoms, medications, medical conditions, and get AI-powered insights</p>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
