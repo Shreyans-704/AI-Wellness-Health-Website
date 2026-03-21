@@ -66,8 +66,6 @@ exports.handler = async (event, context) => {
     };
   }
 };
-          response: aiResponse,
-          query: query
         }),
       };
     } else {
