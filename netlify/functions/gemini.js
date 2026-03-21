@@ -62,7 +62,11 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: "AI failed", response: "Try again later" }),
+      body: JSON.stringify({
+        error: "AI failed",
+        response: error?.message || "Try again later",
+        details: error?.stack || String(error),
+      }),
     };
   }
 };
