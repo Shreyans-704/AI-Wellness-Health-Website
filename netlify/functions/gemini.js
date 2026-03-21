@@ -44,8 +44,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Call Gemini via REST v1 with the standard flash model
-    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Use AI Studio-compatible model/endpoint
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const payload = {
       contents: [
@@ -61,13 +61,15 @@ exports.handler = async (event, context) => {
       body: JSON.stringify(payload),
     });
 
+    const aiJson = await aiRes.json();
+
     if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      throw new Error(`Upstream Gemini error ${aiRes.status}: ${errText}`);
+      throw new Error(JSON.stringify(aiJson));
     }
 
-    const aiJson = await aiRes.json();
-    const text = aiJson?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const text =
+      aiJson?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response from AI";
 
     return {
       statusCode: 200,
