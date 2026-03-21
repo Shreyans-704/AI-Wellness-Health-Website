@@ -44,8 +44,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Call Gemini via REST v1beta with the standard flash model
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Call Gemini via REST v1 with the standard flash model
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const payload = {
       contents: [
