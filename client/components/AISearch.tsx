@@ -25,11 +25,7 @@ const AISearch = forwardRef<AISearchRef>((props, ref) => {
 
   // Helper function to get the correct API endpoint
   const getApiEndpoint = () => {
-    // In production (deployed on Netlify), always use Render backend
-    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-      return 'https://ai-wellness-health-website.onrender.com/api/gemini';
-    }
-    // In development, use local Express server
+    // Always use /api/gemini - Netlify redirects to serverless function in production
     return '/api/gemini';
   };
 
