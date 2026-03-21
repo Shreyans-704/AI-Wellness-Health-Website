@@ -66,37 +66,3 @@ exports.handler = async (event, context) => {
     };
   }
 };
-        }),
-      };
-    } else {
-      console.error('Invalid response structure from Gemini API');
-      return {
-        statusCode: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          error: 'Invalid response from Gemini API',
-          response: 'Sorry, received an unexpected response format from the AI service.'
-        }),
-      };
-    }
-
-  } catch (error) {
-    console.error('Function error:', error);
-    console.error('Error stack:', error.stack);
-    
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({
-        error: 'Failed to get AI response',
-        response: 'Sorry, I was unable to process your health question at the moment. Please try again later or contact our support team for assistance.'
-      }),
-    };
-  }
-};
