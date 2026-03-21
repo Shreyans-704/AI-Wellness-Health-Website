@@ -12,7 +12,11 @@ export const handleGeminiQuery: RequestHandler = async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: "API key missing" });
+      console.error("GEMINI_API_KEY environment variable is not set");
+      return res.status(500).json({ 
+        error: "API key missing",
+        response: "AI service is not configured. Please contact administrator." 
+      });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
