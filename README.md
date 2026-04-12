@@ -228,25 +228,6 @@ pnpm build
 # Deploy ./dist and server files to your hosting
 ```
 
-## 📝 Environment Variables
-
-```env
-# Supabase
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# Gemini API
-GEMINI_API_KEY=your_gemini_api_key
-
-# Clerk Authentication
-VITE_CLERK_PUBLISHABLE_KEY=your_clerk_key
-CLERK_SECRET_KEY=your_clerk_secret
-
-# Development
-PING_MESSAGE=pong
-```
-
 ## 🔧 Troubleshooting
 
 ### PDF not saving to database?
